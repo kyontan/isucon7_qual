@@ -89,8 +89,17 @@ class App < Sinatra::Base
     name = params[:name]
     statement = db.prepare('SELECT id, salt, password FROM user WHERE name = ? LIMIT 1')
     row = statement.execute(name).first
-    if row.nil? || row['password'] != Digest::SHA1.hexdigest(row['salt'] + params[:password])
+    if row.nil?
       return 403
+    end
+    if row['id'] <= 1000
+      if row['password'] != Digest::SHA1.hexdigest(row['salt'] + params[:password])
+        return 403
+      end
+    else
+      if row['password'] != params[:password]
+        return 403
+      end
     end
     session[:user_id] = row['id']
     redirect '/', 303
@@ -371,10 +380,10 @@ class App < Sinatra::Base
   end
 
   def register(user, password)
-    salt = random_string(20)
-    pass_digest = Digest::SHA1.hexdigest(salt + password)
+    salt = '' # random_string(20)
+    #pass_digest = Digest::SHA1.hexdigest(salt + password)
     statement = db.prepare('INSERT INTO user (name, salt, password, display_name, avatar_icon, created_at) VALUES (?, ?, ?, ?, ?, NOW())')
-    statement.execute(user, salt, pass_digest, user, 'default.png')
+    statement.execute(user, salt, password, user, 'default.png')
     row = db.query('SELECT LAST_INSERT_ID() AS last_insert_id').first
     statement.close
     row['last_insert_id']
