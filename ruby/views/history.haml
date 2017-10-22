@@ -1,28 +1,28 @@
-#history
+#history<>
   - @messages.each do |msg|
-    .media.message
-      %img.avatar.d-flex.align-self-start.mr-3{:alt => "no avatar", :src => "/icons/#{msg['user']['avatar_icon']}"}/
-      .media-body
-        %h5.mt-0
-          %a{:href => "/profile/#{msg['user']['name']}"}
+    .media.message<>
+      %img.avatar.d-flex.align-self-start.mr-3{:alt => "no avatar", :src => "/icons/#{msg['user']['avatar_icon']}"}<>/
+      .media-body<>
+        %h5.mt-0<>
+          %a{:href => "/profile/#{msg['user']['name']}"}<>
             = msg['user']['display_name']
             @#{msg['user']['name']}
-        %p.content= msg['content']
-        %p.message-date= msg['date']
-%nav
-  %ul.pagination
+        %p.content<>= msg['content']
+        %p.message-date<>= msg['date']
+%nav<>
+  %ul.pagination<>
     - if 1 < @page
-      %li
-        %a{:href => "/history/#{@channel_id}?page=#{@page - 1}"}
-          %span «
+      %li<>
+        %a{:href => "/history/#{@channel_id}?page=#{@page - 1}"}<>
+          %span<> «
     - 1.upto(@max_page) do |p|
       - if @page == p
-        %li.active
-          %a{:href => "/history/#{@channel_id}?page=#{p}"}= p
+        %li.active<>
+          %a{:href => "/history/#{@channel_id}?page=#{p}"}<>= p
       - else
-        %li
-          %a{:href => "/history/#{@channel_id}?page=#{p}"}= p
+        %li<>
+          %a{:href => "/history/#{@channel_id}?page=#{p}"}<>= p
     - if @page < @max_page
-      %li
-        %a{:href => "/history/#{@channel_id}?page=#{@page + 1}"}
-          %span »
+      %li<>
+        %a{:href => "/history/#{@channel_id}?page=#{@page + 1}"}<>
+          %span<> »
