@@ -87,7 +87,7 @@ class App < Sinatra::Base
 
   post '/login' do
     name = params[:name]
-    statement = db.prepare('SELECT * FROM user WHERE name = ?')
+    statement = db.prepare('SELECT id, salt, password FROM user WHERE name = ? LIMIT 1')
     row = statement.execute(name).first
     if row.nil? || row['password'] != Digest::SHA1.hexdigest(row['salt'] + params[:password])
       return 403
@@ -120,13 +120,13 @@ class App < Sinatra::Base
 
     channel_id = params[:channel_id].to_i
     last_message_id = params[:last_message_id].to_i
-    statement = db.prepare('SELECT * FROM message WHERE id > ? AND channel_id = ? ORDER BY id DESC LIMIT 100')
+    statement = db.prepare('SELECT id, user_id, content, created_at FROM message WHERE id > ? AND channel_id = ? ORDER BY id DESC LIMIT 100')
     rows = statement.execute(last_message_id, channel_id).to_a
     response = []
     rows.each do |row|
       r = {}
       r['id'] = row['id']
-      statement = db.prepare('SELECT name, display_name, avatar_icon FROM user WHERE id = ?')
+      statement = db.prepare('SELECT name, display_name, avatar_icon FROM user WHERE id = ? LIMIT 1')
       r['user'] = statement.execute(row['user_id']).first
       r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
       r['content'] = row['content']
@@ -136,11 +136,7 @@ class App < Sinatra::Base
     response.reverse!
 
     max_message_id = rows.empty? ? 0 : rows.map { |row| row['id'] }.max
-    statement = db.prepare([
-      'INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at) ',
-      'VALUES (?, ?, ?, NOW(), NOW()) ',
-      'ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()',
-    ].join)
+    statement = db.prepare('INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at) VALUES (?, ?, ?, NOW(), NOW()) ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()')
     statement.execute(user_id, channel_id, max_message_id, max_message_id)
 
     content_type :json
@@ -160,16 +156,16 @@ class App < Sinatra::Base
 
     res = []
     channel_ids.each do |channel_id|
-      statement = db.prepare('SELECT * FROM haveread WHERE user_id = ? AND channel_id = ?')
+      statement = db.prepare('SELECT message_id FROM haveread WHERE user_id = ? AND channel_id = ? LIMIT 1')
       row = statement.execute(user_id, channel_id).first
       statement.close
       r = {}
       r['channel_id'] = channel_id
       r['unread'] = if row.nil?
-        statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?')
+        statement = db.prepare('SELECT COUNT(id) as cnt FROM message WHERE channel_id = ?')
         statement.execute(channel_id).first['cnt']
       else
-        statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id')
+        statement = db.prepare('SELECT COUNT(id) as cnt FROM message WHERE channel_id = ? AND ? < id')
         statement.execute(channel_id, row['message_id']).first['cnt']
       end
       statement.close
@@ -197,14 +193,14 @@ class App < Sinatra::Base
     @page = @page.to_i
 
     n = 20
-    statement = db.prepare('SELECT * FROM message WHERE channel_id = ? ORDER BY id DESC LIMIT ? OFFSET ?')
+    statement = db.prepare('SELECT id, user_id, created_at, content FROM message WHERE channel_id = ? ORDER BY id DESC LIMIT ? OFFSET ?')
     rows = statement.execute(@channel_id, n, (@page - 1) * n).to_a
     statement.close
     @messages = []
     rows.each do |row|
       r = {}
       r['id'] = row['id']
-      statement = db.prepare('SELECT name, display_name, avatar_icon FROM user WHERE id = ?')
+      statement = db.prepare('SELECT name, display_name, avatar_icon FROM user WHERE id = ? LIMIT 1')
       r['user'] = statement.execute(row['user_id']).first
       r['date'] = row['created_at'].strftime("%Y/%m/%d %H:%M:%S")
       r['content'] = row['content']
@@ -213,7 +209,7 @@ class App < Sinatra::Base
     end
     @messages.reverse!
 
-    statement = db.prepare('SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?')
+    statement = db.prepare('SELECT COUNT(id) as cnt FROM message WHERE channel_id = ?')
     cnt = statement.execute(@channel_id).first['cnt'].to_f
     statement.close
     @max_page = cnt == 0 ? 1 :(cnt / n).ceil
@@ -232,7 +228,7 @@ class App < Sinatra::Base
     @channels, = get_channel_list_info
 
     user_name = params[:user_name]
-    statement = db.prepare('SELECT * FROM user WHERE name = ?')
+    statement = db.prepare('SELECT id, name, display_name, avatar_icon FROM user WHERE name = ? LIMIT 1')
     @user = statement.execute(user_name).first
     statement.close
 
@@ -354,7 +350,7 @@ class App < Sinatra::Base
   end
 
   def db_get_user(user_id)
-    statement = db.prepare('SELECT * FROM user WHERE id = ?')
+    statement = db.prepare('SELECT id, name, display_name, avatar_icon FROM user WHERE id = ? LIMIT 1')
     user = statement.execute(user_id).first
     statement.close
     user
@@ -382,7 +378,7 @@ class App < Sinatra::Base
   end
 
   def get_channel_list_info(focus_channel_id = nil)
-    channels = db.query('SELECT * FROM channel ORDER BY id').to_a
+    channels = db.query('SELECT id, name, description FROM channel ORDER BY id').to_a
     description = ''
     channels.each do |channel|
       if channel['id'] == focus_channel_id
