@@ -236,8 +236,6 @@ class App < Sinatra::Base
       return 404
     end
 
-    p @user
-
     @self_profile = user['id'] == @user['id']
     haml :profile
   end
