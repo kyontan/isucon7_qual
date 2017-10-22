@@ -236,6 +236,8 @@ class App < Sinatra::Base
       return 404
     end
 
+    p @user
+
     @self_profile = user['id'] == @user['id']
     haml :profile
   end
@@ -350,7 +352,7 @@ class App < Sinatra::Base
   end
 
   def db_get_user(user_id)
-    statement = db.prepare('SELECT id, name, display_name FROM user WHERE id = ? LIMIT 1')
+    statement = db.prepare('SELECT id, name, display_name, avatar_icon FROM user WHERE id = ? LIMIT 1')
     user = statement.execute(user_id).first
     statement.close
     user
