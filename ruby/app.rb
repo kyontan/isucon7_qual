@@ -300,7 +300,11 @@ class App < Sinatra::Base
       end
     end
 
-    if !avatar_name.nil? && !avatar_data.nil?
+    statement = db.prepare('SELECT COUNT(name) FROM image WHERE name = ?')
+    avator_count = statement.execute(avatar_name).first
+    statement.close
+
+    if !avatar_name.nil? && !avatar_data.nil? && !avator_count.zero?
       statement = db.prepare('INSERT INTO image (name, data) VALUES (?, ?)')
       statement.execute(avatar_name, avatar_data)
       statement.close
@@ -316,11 +320,6 @@ class App < Sinatra::Base
     end
 
     redirect '/', 303
-  end
-
-  before '/icons/:file_name' do
-    cache_control :public, max_age: 86400
-    etag params[:file_name]
   end
 
   get '/icons/:file_name' do
