@@ -5,6 +5,7 @@ gem 'puma'
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'hamlit'
+gem 'redis'
 
 group :development do
   gem 'pry'

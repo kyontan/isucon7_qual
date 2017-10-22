@@ -2,6 +2,7 @@ require 'digest/sha1'
 require 'mysql2'
 require 'sinatra/base'
 require 'hamlit'
+require 'redis'
 
 class App < Sinatra::Base
   configure do
@@ -305,9 +306,10 @@ class App < Sinatra::Base
     end
 
     if !avatar_name.nil? && !avatar_data.nil?
-      statement = db.prepare('INSERT INTO image (name, data) VALUES (?, ?)')
-      statement.execute(avatar_name, avatar_data)
-      statement.close
+      # statement = db.prepare('INSERT INTO image (name, data) VALUES (?, ?)')
+      # statement.execute(avatar_name, avatar_data)
+      # statement.close
+      redis.set(avatar_name, avatar_data)
       statement = db.prepare('UPDATE user SET avatar_icon = ? WHERE id = ?')
       statement.execute(avatar_name, user['id'])
       statement.close
@@ -322,16 +324,24 @@ class App < Sinatra::Base
     redirect '/', 303
   end
 
+  before '/icons/:file_name' do
+    cache_control :public, max_age: 86400
+    etag params[:file_name]
+  end
+
   get '/icons/:file_name' do
     file_name = params[:file_name]
-    statement = db.prepare('SELECT * FROM image WHERE name = ?')
-    row = statement.execute(file_name).first
-    statement.close
+    # statement = db.prepare('SELECT * FROM image WHERE name = ?')
+    # row = statement.execute(file_name).first
+    # statement.close
     ext = file_name.include?('.') ? File.extname(file_name) : ''
     mime = ext2mime(ext)
-    if !row.nil? && !mime.empty?
+    data = redis.get(file_name)
+    if data && mime
+    # if !row.nil? && !mime.empty?
       content_type mime
-      return row['data']
+      return data
+      # return row['data']
     end
     404
   end
@@ -367,12 +377,12 @@ class App < Sinatra::Base
     messages
   end
 
-  def random_string(n)
-    Array.new(20).map { (('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a).sample }.join
-  end
+  # def random_string(n)
+  #   Array.new(20).map { (('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a).sample }.join
+  # end
 
   def register(user, password)
-    salt = random_string(20)
+    salt = "" #random_string(20)
     pass_digest = Digest::SHA1.hexdigest(salt + password)
     statement = db.prepare('INSERT INTO user (name, salt, password, display_name, avatar_icon, created_at) VALUES (?, ?, ?, ?, ?, NOW())')
     statement.execute(user, salt, pass_digest, user, 'default.png')
@@ -404,5 +414,9 @@ class App < Sinatra::Base
       return 'image/gif'
     end
     ''
+  end
+
+  def redis
+    @redis ||= Redis.new(host: "app3632")
   end
 end
