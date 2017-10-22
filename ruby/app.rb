@@ -325,7 +325,6 @@ class App < Sinatra::Base
   get '/icons/:file_name' do
     file_name = params[:file_name]
     statement = db.prepare('SELECT * FROM image WHERE name = ?')
-    # row = statement.execute(file_name).first
     statement.close
     ext = file_name.include?('.') ? File.extname(file_name) : ''
     mime = ext2mime(ext)
