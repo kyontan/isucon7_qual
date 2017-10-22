@@ -394,11 +394,11 @@ class App < Sinatra::Base
   end
 
   def ext2mime(ext)
-    if ['.jpg', '.jpeg'].include?(ext)
-      return 'image/jpeg'
-    end
     if ext == '.png'
       return 'image/png'
+    end
+    if ext == '.jpg' || ext == '.jpeg'
+      return 'image/jpeg'
     end
     if ext == '.gif'
       return 'image/gif'
