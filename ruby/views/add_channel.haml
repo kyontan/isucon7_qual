@@ -1,0 +1,10 @@
+%form{:action => "/add_channel", :method => "post"}
+  .form-group.row
+    %label.col-sm-2.col-form-label{:for => "inputname"} チャンネル名
+    .col-sm-10
+      %input#inputname.form-control{:name => "name", :type => "text"}/
+  .form-group.row
+    %label.col-sm-2.col-form-label{:for => "inputdescription"} 詳細
+    .col-sm-10
+      %textarea#inputdescription.form-control.input-sm{:name => "description", :rows => "3"}
+  %button.btn.btn-primary{:type => "submit"} 登録

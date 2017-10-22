@@ -1,0 +1,10 @@
+%form{:action => "/register", :method => "post"}
+  .form-group.row
+    %label.col-sm-2.col-form-label{:for => "inputname"} ユーザ名
+    .col-sm-10
+      %input#inputname.form-control{:name => "name", :placeholder => "User", :type => "text"}/
+  .form-group.row
+    %label.col-sm-2.col-form-label{:for => "inputpass"} パスワード
+    .col-sm-10
+      %input#inputpass.form-control{:name => "password", :placeholder => "Password", :type => "password"}/
+  %button.btn.btn-primary{:type => "submit"} 登録
