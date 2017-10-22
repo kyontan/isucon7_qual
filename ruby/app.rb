@@ -41,6 +41,7 @@ class App < Sinatra::Base
     db.query("DELETE FROM channel WHERE id > 10")
     db.query("DELETE FROM message WHERE id > 10000")
     db.query("DELETE FROM haveread")
+
     204
   end
 
@@ -102,6 +103,7 @@ class App < Sinatra::Base
       end
     end
     session[:user_id] = row['id']
+    statement.close
     redirect '/', 303
   end
 
@@ -147,6 +149,7 @@ class App < Sinatra::Base
     max_message_id = rows.empty? ? 0 : rows.map { |row| row['id'] }.max
     statement = db.prepare('INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at) VALUES (?, ?, ?, NOW(), NOW()) ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()')
     statement.execute(user_id, channel_id, max_message_id, max_message_id)
+    statement.close
 
     content_type :json
     response.to_json
@@ -194,7 +197,8 @@ class App < Sinatra::Base
     if @page.nil?
       @page = '1'
     end
-    if @page !~ /\A\d+\Z/ || @page == '0'
+ 
+   if !(/\A\d+\Z/ === @page) || @page == '0'
       return 400
     end
     @page = @page.to_i
