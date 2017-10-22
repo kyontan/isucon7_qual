@@ -318,6 +318,11 @@ class App < Sinatra::Base
     redirect '/', 303
   end
 
+  before '/icons/:file_name' do
+    cache_control :public, max_age: 86400
+    etag params[:file_name]
+  end
+
   get '/icons/:file_name' do
     file_name = params[:file_name]
     statement = db.prepare('SELECT * FROM image WHERE name = ?')
