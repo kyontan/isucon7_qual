@@ -350,7 +350,7 @@ class App < Sinatra::Base
   end
 
   def db_get_user(user_id)
-    statement = db.prepare('SELECT id, display_name FROM user WHERE id = ? LIMIT 1')
+    statement = db.prepare('SELECT id, name, display_name FROM user WHERE id = ? LIMIT 1')
     user = statement.execute(user_id).first
     statement.close
     user
