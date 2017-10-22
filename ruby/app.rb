@@ -149,8 +149,6 @@ class App < Sinatra::Base
       return 403
     end
 
-    sleep 1.0
-
     rows = db.query('SELECT id FROM channel').to_a
     channel_ids = rows.map { |row| row['id'] }
 
@@ -395,11 +393,11 @@ class App < Sinatra::Base
   end
 
   def ext2mime(ext)
-    if ['.jpg', '.jpeg'].include?(ext)
-      return 'image/jpeg'
-    end
     if ext == '.png'
       return 'image/png'
+    end
+    if ext == '.jpg' || ext == '.jpeg'
+      return 'image/jpeg'
     end
     if ext == '.gif'
       return 'image/gif'
