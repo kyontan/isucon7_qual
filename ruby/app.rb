@@ -293,20 +293,25 @@ class App < Sinatra::Base
         end
 
         data = file[:tempfile].read
-        digest = Digest::SHA1.hexdigest(data)
+        # digest = Digest::SHA1.hexdigest(data)
 
-        avatar_name = digest + ext
+        # avatar_name = digest + ext
+        avatar_name = user['id'].to_s + ext
         avatar_data = data
-      end
-    end
 
-    if !avatar_name.nil? && !avatar_data.nil?
-      statement = db.prepare('INSERT INTO image (name, data) VALUES (?, ?)')
-      statement.execute(avatar_name, avatar_data)
-      statement.close
-      statement = db.prepare('UPDATE user SET avatar_icon = ? WHERE id = ?')
-      statement.execute(avatar_name, user['id'])
-      statement.close
+        statement = db.prepare('SELECT name FROM image WHERE name = ?')
+        avatar_not_exists = statement.execute(avatar_name).count == 0
+        statement.close
+
+        if avatar_not_exists
+          statement = db.prepare('INSERT INTO image (name, data) VALUES (?, ?)')
+          statement.execute(avatar_name, avatar_data)
+          statement.close
+          statement = db.prepare('UPDATE user SET avatar_icon = ? WHERE id = ?')
+          statement.execute(avatar_name, user['id'])
+          statement.close
+        end
+      end
     end
 
     if !display_name.nil? || !display_name.empty?
@@ -318,14 +323,9 @@ class App < Sinatra::Base
     redirect '/', 303
   end
 
-  before '/icons/:file_name' do
-    cache_control :public, max_age: 86400
-    etag params[:file_name]
-  end
-
   get '/icons/:file_name' do
     file_name = params[:file_name]
-    statement = db.prepare('SELECT * FROM image WHERE name = ?')
+    statement = db.prepare('SELECT data FROM image WHERE name = ?')
     row = statement.execute(file_name).first
     statement.close
     ext = file_name.include?('.') ? File.extname(file_name) : ''
