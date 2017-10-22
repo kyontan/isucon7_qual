@@ -20,7 +20,7 @@
         %li.active
       - else
         %li
-      %a{:href => "/history/#{@channel_id}?page=#{p}"}= p
+          %a{:href => "/history/#{@channel_id}?page=#{p}"}= p
     - if @page < @max_page
       %li
         %a{:href => "/history/#{@channel_id}?page=#{@page + 1}"}
