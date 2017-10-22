@@ -1,6 +1,7 @@
 require 'digest/sha1'
 require 'mysql2'
 require 'sinatra/base'
+require 'hamlit'
 
 class App < Sinatra::Base
   configure do
@@ -9,6 +10,7 @@ class App < Sinatra::Base
     set :avatar_max_size, 1 * 1024 * 1024
 
     enable :sessions
+    set :haml, { escape_html: false }
   end
 
   configure :development do

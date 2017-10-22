@@ -18,6 +18,7 @@
     - 1.upto(@max_page) do |p|
       - if @page == p
         %li.active
+          %a{:href => "/history/#{@channel_id}?page=#{p}"}= p
       - else
         %li
           %a{:href => "/history/#{@channel_id}?page=#{p}"}= p
