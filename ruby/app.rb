@@ -323,13 +323,13 @@ class App < Sinatra::Base
   get '/icons/:file_name' do
     file_name = params[:file_name]
     statement = db.prepare('SELECT * FROM image WHERE name = ?')
-    row = statement.execute(file_name).first
+    # row = statement.execute(file_name).first
     statement.close
     ext = file_name.include?('.') ? File.extname(file_name) : ''
     mime = ext2mime(ext)
     if !row.nil? && !mime.empty?
       content_type mime
-      return row['data']
+      return redis_client.get(file_name)
     end
     404
   end
@@ -402,5 +402,9 @@ class App < Sinatra::Base
       return 'image/gif'
     end
     ''
+  end
+
+  def redis_client
+    @redis ||= Redis.new('app3632')
   end
 end
