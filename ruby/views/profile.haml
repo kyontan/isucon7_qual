@@ -1,27 +1,27 @@
 - if @self_profile
-  %form{:action => "/profile", :enctype => "multipart/form-data", :method => "post"}
-    .form-group.row
-      %label.col-sm-2.col-form-label ユーザ名
-      .col-sm-10
-        %p= user['name']
-      %label.col-sm-2.col-form-label 表示名
-      .col-sm-10
-        %input.form-control{:name => "display_name", :placeholder => "表示名", :type => "text", :value => "#{user['display_name']}"}/
-      %label.col-sm-2.col-form-label アイコン
-      .col-sm-10
-        %input{:name => "avatar_icon", :type => "file"}/
-      .col-sm-2
-      .col-sm-10
-        %img.avatar-lg{:alt => "no avatar", :src => "/icons/#{user['avatar_icon']}"}/
-    %button.btn.btn-primary{:type => "submit"} 更新
+  %form{:action => "/profile", :enctype => "multipart/form-data", :method => "post"}<>
+    .form-group.row<>
+      %label.col-sm-2.col-form-label<> ユーザ名
+      .col-sm-10<>
+        %p<>= user['name']
+      %label.col-sm-2.col-form-label<> 表示名
+      .col-sm-10<>
+        %input.form-control{:name => "display_name", :placeholder => "表示名", :type => "text", :value => "#{user['display_name']}"}<>/
+      %label.col-sm-2.col-form-label<> アイコン
+      .col-sm-10<>
+        %input{:name => "avatar_icon", :type => "file"}<>/
+      .col-sm-2<>
+      .col-sm-10<>
+        %img.avatar-lg{:alt => "no avatar", :src => "/icons/#{user['avatar_icon']}"}<>/
+    %button.btn.btn-primary{:type => "submit"}<> 更新
 - else
-  .form-group.row
-    %label.col-sm-2.col-form-label ユーザ名
-    .col-sm-10
-      %p= @user['name']
-    %label.col-sm-2.col-form-label 表示名
-    .col-sm-10
-      %p= @user['display_name']
-    %label.col-sm-2.col-form-label アイコン
-    .col-sm-10
-      %img.avatar-lg{:alt => "no avatar", :src => "/icons/#{@user['avatar_icon']}"}/
+  .form-group.row<>
+    %label.col-sm-2.col-form-label<> ユーザ名
+    .col-sm-10<>
+      %p<>= @user['name']
+    %label.col-sm-2.col-form-label<> 表示名
+    .col-sm-10<>
+      %p<>= @user['display_name']
+    %label.col-sm-2.col-form-label<> アイコン
+    .col-sm-10<>
+      %img.avatar-lg{:alt => "no avatar", :src => "/icons/#{@user['avatar_icon']}"}<>/
