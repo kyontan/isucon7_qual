@@ -1,6 +1,7 @@
 require 'digest/sha1'
 require 'mysql2'
 require 'sinatra/base'
+require 'hamlit'
 
 class App < Sinatra::Base
   configure do
@@ -9,6 +10,7 @@ class App < Sinatra::Base
     set :avatar_max_size, 1 * 1024 * 1024
 
     enable :sessions
+    set :haml, { escape_html: false }
   end
 
   configure :development do
@@ -46,7 +48,7 @@ class App < Sinatra::Base
     if session.has_key?(:user_id)
       return redirect '/channel/1', 303
     end
-    erb :index
+    haml :index
   end
 
   get '/channel/:channel_id' do
@@ -56,11 +58,11 @@ class App < Sinatra::Base
 
     @channel_id = params[:channel_id].to_i
     @channels, @description = get_channel_list_info(@channel_id)
-    erb :channel
+    haml :channel
   end
 
   get '/register' do
-    erb :register
+    haml :register
   end
 
   post '/register' do
@@ -80,7 +82,7 @@ class App < Sinatra::Base
   end
 
   get '/login' do
-    erb :login
+    haml :login
   end
 
   post '/login' do
@@ -219,7 +221,7 @@ class App < Sinatra::Base
     return 400 if @page > @max_page
 
     @channels, @description = get_channel_list_info(@channel_id)
-    erb :history
+    haml :history
   end
 
   get '/profile/:user_name' do
@@ -239,7 +241,7 @@ class App < Sinatra::Base
     end
 
     @self_profile = user['id'] == @user['id']
-    erb :profile
+    haml :profile
   end
   
   get '/add_channel' do
@@ -248,7 +250,7 @@ class App < Sinatra::Base
     end
 
     @channels, = get_channel_list_info
-    erb :add_channel
+    haml :add_channel
   end
 
   post '/add_channel' do
